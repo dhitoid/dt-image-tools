@@ -450,6 +450,38 @@ footer{
   transform:translateX(-50%) translateY(0);
 }
 
+/* =========================
+   ISLAND PROGRESS
+========================= */
+
+.island-progress{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+  margin-top:8px;
+}
+
+.island-progress-bar{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:
+    linear-gradient(
+      90deg,
+      #4f46e5,
+      #06b6d4
+    );
+
+  transition:width .25s linear;
+}
+
+.progress-text{
+  color:#67e8f9 !important;
+  font-weight:700;
+}
+
 .island-icon{
   width:42px;
   height:42px;
@@ -1470,10 +1502,30 @@ canvas,
     <i data-feather="check"></i>
   </div>
 
-  <div class="island-content">
-    <h4 id="islandTitle">Success</h4>
-    <p id="islandDesc">Image processed successfully</p>
+<div class="island-content">
+
+  <h4 id="islandTitle">
+    Success
+  </h4>
+
+  <p id="islandDesc">
+    Image processed successfully
+  </p>
+
+  <div
+    class="island-progress"
+    id="islandProgress"
+    style="display:none;"
+  >
+
+    <div
+      class="island-progress-bar"
+      id="islandProgressBar"
+    ></div>
+
   </div>
+
+</div>
 
 </div>
 
@@ -1552,6 +1604,12 @@ const islandTitle =
 
 const islandDesc =
   document.getElementById("islandDesc");
+
+const islandProgress =
+  document.getElementById("islandProgress");
+
+const islandProgressBar =
+  document.getElementById("islandProgressBar");
 
 const exportFormat =
   document.getElementById("exportFormat");
@@ -1737,11 +1795,16 @@ compressBtn.addEventListener("click", () => {
    DYNAMIC ISLAND
 ========================= */
 
-function showIsland(title,desc,loading=false){
+function showIsland(
+  title,
+  desc,
+  loading=false,
+  progress=null
+){
 
   islandTitle.innerText = title;
 
-  islandDesc.innerText = desc;
+  islandDesc.innerHTML = desc;
 
   const iconWrap =
     document.querySelector(".island-icon");
@@ -1757,6 +1820,23 @@ function showIsland(title,desc,loading=false){
       `<i data-feather="check"></i>`;
 
     feather.replace();
+
+  }
+
+  // PROGRESS
+
+  if(progress !== null){
+
+    islandProgress.style.display =
+      "block";
+
+    islandProgressBar.style.width =
+      progress + "%";
+
+  }else{
+
+    islandProgress.style.display =
+      "none";
 
   }
 
@@ -1917,21 +1997,68 @@ document
 /* =========================
    PROCESS IMAGE
 ========================= */
-
 function processImage(width,height,quality){
 
   if(!uploadedImage) return;
 
-  showIsland(
-    "Processing",
-    "AI sedang memproses gambar...",
-    true
-  );
-
   resizeBtn.disabled = true;
   compressBtn.disabled = true;
 
+  let progress = 0;
+
+  showIsland(
+    "AI Processing",
+    `<span class="progress-text">0%</span> Memulai proses...`,
+    true,
+    0
+  );
+
+  const progressInterval =
+    setInterval(() => {
+
+      progress += Math.floor(
+        Math.random() * 18
+      );
+
+      if(progress > 95){
+        progress = 95;
+      }
+
+      let status =
+        "Optimizing image...";
+
+      if(progress > 20){
+        status =
+          "Enhancing quality...";
+      }
+
+      if(progress > 45){
+        status =
+          "Compressing assets...";
+      }
+
+      if(progress > 70){
+        status =
+          "Preparing export...";
+      }
+
+      showIsland(
+        "AI Processing",
+        `
+        <span class="progress-text">
+          ${progress}%
+        </span>
+        ${status}
+        `,
+        true,
+        progress
+      );
+
+    },220);
+
   setTimeout(() => {
+
+    clearInterval(progressInterval);
 
     const canvas =
       document.createElement("canvas");
@@ -1963,8 +2090,6 @@ function processImage(width,height,quality){
     previewImg.src =
       processedImage;
 
-    // ESTIMATION
-
     const base64Length =
       processedImage.length -
       (`data:${format};base64,`).length;
@@ -1988,12 +2113,29 @@ function processImage(width,height,quality){
     • ${sizeMB} MB
     `;
 
-    // SHOW DOWNLOAD BUTTON
+    // COMPLETE
+
+    islandProgressBar.style.width =
+      "100%";
+
+    showIsland(
+      "Completed",
+      `
+      <span class="progress-text">
+        100%
+      </span>
+      Image ready to download
+      `,
+      false,
+      100
+    );
+
+    // SHOW DOWNLOAD
 
     downloadBtn.style.display =
       "block";
 
-    // AUTO OPEN EXPORT TAB
+    // OPEN EXPORT TAB
 
     tabBtns.forEach(el =>
       el.classList.remove("active")
@@ -2016,12 +2158,7 @@ function processImage(width,height,quality){
     resizeBtn.disabled = false;
     compressBtn.disabled = false;
 
-    showIsland(
-      "Image Ready",
-      "Image berhasil diproses"
-    );
-
-  },1200);
+  },2800);
 
 }
 
