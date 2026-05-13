@@ -647,6 +647,121 @@ footer{
   flex-wrap:wrap;
 }
 
+/* =========================
+   WORKSPACE
+========================= */
+
+.workspace{
+  display:grid;
+  grid-template-columns:260px 1fr 320px;
+  gap:24px;
+  margin-top:24px;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.layer-sidebar{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:28px;
+  padding:20px;
+  height:fit-content;
+}
+
+.sidebar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.sidebar-header button{
+  width:40px;
+  height:40px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+  color:white;
+  cursor:pointer;
+}
+
+.layer-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.layer-item{
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  cursor:pointer;
+  transition:.3s;
+  border:1px solid transparent;
+}
+
+.layer-item.active{
+  border-color:#67e8f9;
+  background:rgba(103,232,249,.08);
+}
+
+/* =========================
+   STAGE
+========================= */
+
+.editor-stage{
+  min-width:0;
+}
+
+.canvas-wrap{
+  position:relative;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:30px;
+  padding:20px;
+  overflow:hidden;
+}
+
+.canvas-wrap img{
+  width:100%;
+  border-radius:20px;
+}
+
+/* =========================
+   PANEL
+========================= */
+
+.editor-panel{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:28px;
+  padding:24px;
+  height:fit-content;
+}
+
+.panel-section{
+  margin-bottom:28px;
+}
+
+.panel-section h4{
+  margin-bottom:16px;
+  color:#67e8f9;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1200px){
+
+.workspace{
+  grid-template-columns:1fr;
+}
+
+}
+
 </style>
 </head>
 <body>
@@ -699,93 +814,150 @@ footer{
 
 <div class="preview" id="preview">
 
-  <img id="previewImg">
-    
-  <div class="batch-grid" id="batchGrid"></div>
+  <!-- WORKSPACE -->
 
-<div class="cropper-wrap">
-  <img id="cropperImage">
-</div>
+  <div class="workspace">
 
-  <div class="editor-panel">
+    <!-- SIDEBAR -->
 
-    <div class="input-group">
-      <label>Width</label>
-      <input type="number" id="resizeWidth" placeholder="1920">
-    </div>
+    <aside class="layer-sidebar">
 
-    <div class="input-group">
-      <label>Height</label>
-      <input type="number" id="resizeHeight" placeholder="1080">
-    </div>
+      <div class="sidebar-header">
+        <h3>Layers</h3>
 
-    <div class="input-group">
-      <label>Compression Quality</label>
-
-      <div class="range-wrap">
-        <input
-          type="range"
-          min="0.1"
-          max="1"
-          step="0.1"
-          value="0.8"
-          id="qualityRange"
-        >
-
-        <span id="qualityValue">80%</span>
+        <button id="addLayerBtn">
+          <i data-feather="plus"></i>
+        </button>
       </div>
-    </div>
-    
-    <div class="export-wrap">
 
-  <select id="exportFormat">
+      <div id="layerList" class="layer-list"></div>
 
-    <option value="image/jpeg">
-      Export JPG
-    </option>
+    </aside>
 
-    <option value="image/png">
-      Export PNG
-    </option>
+    <!-- CANVAS AREA -->
 
-    <option value="image/webp">
-      Export WEBP
-    </option>
+    <main class="editor-stage">
 
-  </select>
+      <div class="canvas-wrap">
 
-</div>
+        <img id="previewImg">
 
-<div class="crop-actions">
+        <div class="cropper-wrap">
+          <img id="cropperImage">
+        </div>
 
-  <button class="tool-btn" id="cropStartBtn">
-    Start Crop
-  </button>
+      </div>
 
-  <button class="tool-btn" id="cropApplyBtn">
-    Apply Crop
-  </button>
+      <div class="batch-grid" id="batchGrid"></div>
 
-</div>
+    </main>
 
-    <div class="tools">
-      <button class="tool-btn" id="resizeBtn">
-        Resize Image
-      </button>
+    <!-- CONTROL PANEL -->
 
-      <button class="tool-btn" id="compressBtn">
-        Compress Image
-      </button>
+    <aside class="editor-panel">
 
-      <button class="tool-btn" id="downloadBtn">
-        Download
-      </button>
-    </div>
+      <div class="panel-section">
 
-    <div class="image-info">
-      <p id="originalInfo"></p>
-      <p id="resultInfo"></p>
-    </div>
+        <h4>Resize</h4>
+
+        <div class="input-group">
+          <label>Width</label>
+          <input type="number" id="resizeWidth">
+        </div>
+
+        <div class="input-group">
+          <label>Height</label>
+          <input type="number" id="resizeHeight">
+        </div>
+
+      </div>
+
+      <div class="panel-section">
+
+        <h4>Compression</h4>
+
+        <div class="range-wrap">
+
+          <input
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.1"
+            value="0.8"
+            id="qualityRange"
+          >
+
+          <span id="qualityValue">80%</span>
+
+        </div>
+
+      </div>
+
+      <div class="panel-section">
+
+        <h4>Export</h4>
+
+        <div class="export-wrap">
+
+          <select id="exportFormat">
+            <option value="image/jpeg">JPG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WEBP</option>
+          </select>
+
+        </div>
+
+      </div>
+
+      <div class="panel-section">
+
+        <h4>Crop</h4>
+
+        <div class="crop-actions">
+
+          <button class="tool-btn" id="cropStartBtn">
+            Start Crop
+          </button>
+
+          <button class="tool-btn" id="cropApplyBtn">
+            Apply Crop
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="panel-section">
+
+        <h4>Actions</h4>
+
+        <div class="tools">
+
+          <button class="tool-btn" id="resizeBtn">
+            Resize
+          </button>
+
+          <button class="tool-btn" id="compressBtn">
+            Compress
+          </button>
+
+          <button class="tool-btn" id="downloadBtn">
+            Download
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="image-info">
+
+        <p id="originalInfo"></p>
+
+        <p id="resultInfo"></p>
+
+      </div>
+
+    </aside>
 
   </div>
 
@@ -973,6 +1145,13 @@ let originalFile = null;
 let uploadedFiles = [];
 let activeIndex = 0;
 let cropper = null;
+let layers = [];
+
+const layerList =
+  document.getElementById("layerList");
+
+const addLayerBtn =
+  document.getElementById("addLayerBtn");
 
 /* =========================
    QUALITY SLIDER
@@ -1109,24 +1288,109 @@ function showIsland(title,desc){
 }
 
 /* =========================
+   LAYER SYSTEM
+========================= */
+
+function renderLayers(){
+
+  layerList.innerHTML = "";
+
+  layers.forEach((layer,index) => {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "layer-item";
+
+    if(index === activeIndex){
+      div.classList.add("active");
+    }
+
+    div.innerHTML =
+      `
+      <strong>${layer.name}</strong>
+      `;
+
+    div.addEventListener("click",() => {
+
+      activeIndex = index;
+
+      previewImg.src = layer.src;
+
+      cropperImage.src = layer.src;
+
+      document
+        .querySelectorAll(".layer-item")
+        .forEach(el =>
+          el.classList.remove("active")
+        );
+
+      div.classList.add("active");
+
+    });
+
+    layerList.appendChild(div);
+
+  });
+
+}
+
+addLayerBtn.addEventListener("click",() => {
+
+  if(!uploadedImage) return;
+
+  layers.push({
+    name:`Layer ${layers.length + 1}`,
+    src:previewImg.src
+  });
+
+  renderLayers();
+
+  showIsland(
+    "Layer Added",
+    "New layer created"
+  );
+
+});
+
+/* =========================
    ACTIVE IMAGE
 ========================= */
 
 function setActiveImage(img,file,index){
+
   uploadedImage = img;
+
   originalFile = file;
+
   activeIndex = index;
+
   preview.style.display = "block";
+
   previewImg.src = img.src;
+
   cropperImage.src = img.src;
+
   resizeWidth.value = img.width;
+
   resizeHeight.value = img.height;
+
   originalInfo.innerHTML =
-    `
-    Original:
-    ${img.width} x ${img.height}
-    • ${(file.size / 1024 / 1024).toFixed(2)} MB
-    `;
+  `
+  Original:
+  ${img.width} x ${img.height}
+  • ${(file.size / 1024 / 1024).toFixed(2)} MB
+  `;
+
+  layers = [
+    {
+      name:"Background",
+      src:img.src
+    }
+  ];
+
+  renderLayers();
+
 }
 
 /* =========================
@@ -1154,8 +1418,14 @@ function processImage(width,height,quality){
     const sizeMB =
       (blob.size / 1024 / 1024).toFixed(2);
 
-    resultInfo.innerHTML =
-    showIsland(
+resultInfo.innerHTML =
+`
+Result:
+${width} x ${height}
+• ${sizeMB} MB
+`;
+
+showIsland(
   "Image Ready",
   "Your image processed successfully"
 );
