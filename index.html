@@ -9,6 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://unpkg.com/feather-icons"></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
 <style>
 
@@ -588,6 +594,59 @@ footer{
   color:white;
 }
 
+/* =========================
+   BATCH GRID
+========================= */
+
+.batch-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:14px;
+  margin-top:24px;
+}
+
+.batch-item{
+  position:relative;
+  border-radius:18px;
+  overflow:hidden;
+  cursor:pointer;
+  border:2px solid transparent;
+  transition:.3s;
+}
+
+.batch-item.active{
+  border-color:#67e8f9;
+}
+
+.batch-item img{
+  width:100%;
+  height:120px;
+  object-fit:cover;
+  display:block;
+}
+
+/* =========================
+   CROPPER
+========================= */
+
+.cropper-wrap{
+  margin-top:24px;
+  border-radius:24px;
+  overflow:hidden;
+}
+
+.cropper-wrap img{
+  max-width:100%;
+  display:block;
+}
+
+.crop-actions{
+  margin-top:20px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
 </style>
 </head>
 <body>
@@ -629,7 +688,7 @@ footer{
     <div class="tool-box">
 
       <label class="upload">
-        <input type="file" id="fileInput" hidden accept="image/*">
+        <input type="file"   id="fileInput"   hidden   accept="image/*"   multiple >
 
         <i data-feather="upload-cloud"></i>
 
@@ -641,6 +700,12 @@ footer{
 <div class="preview" id="preview">
 
   <img id="previewImg">
+    
+  <div class="batch-grid" id="batchGrid"></div>
+
+<div class="cropper-wrap">
+  <img id="cropperImage">
+</div>
 
   <div class="editor-panel">
 
@@ -688,6 +753,18 @@ footer{
     </option>
 
   </select>
+
+</div>
+
+<div class="crop-actions">
+
+  <button class="tool-btn" id="cropStartBtn">
+    Start Crop
+  </button>
+
+  <button class="tool-btn" id="cropApplyBtn">
+    Apply Crop
+  </button>
 
 </div>
 
@@ -864,6 +941,18 @@ const exportFormat =
 
 const installBtn =
   document.getElementById("installBtn");
+  
+const batchGrid =
+  document.getElementById("batchGrid");
+
+const cropperImage =
+  document.getElementById("cropperImage");
+
+const cropStartBtn =
+  document.getElementById("cropStartBtn");
+
+const cropApplyBtn =
+  document.getElementById("cropApplyBtn");
 
 const installModal =
   document.getElementById("installModal");
@@ -879,10 +968,11 @@ const closeInstall =
 ========================= */
 
 let uploadedImage = null;
-
 let processedImage = null;
-
 let originalFile = null;
+let uploadedFiles = [];
+let activeIndex = 0;
+let cropper = null;
 
 /* =========================
    QUALITY SLIDER
@@ -898,45 +988,71 @@ qualityRange.addEventListener("input", () => {
 /* =========================
    FILE UPLOAD
 ========================= */
-
 fileInput.addEventListener("change", e => {
 
-  const file = e.target.files[0];
+  const files = [...e.target.files];
 
-  if(!file) return;
+  if(!files.length) return;
 
-  originalFile = file;
+  uploadedFiles = files;
 
-  const reader = new FileReader();
+  batchGrid.innerHTML = "";
 
-  reader.onload = function(event){
+  files.forEach((file,index) => {
 
-    uploadedImage = new Image();
+    const reader = new FileReader();
 
-    uploadedImage.src = event.target.result;
+    reader.onload = event => {
 
-    uploadedImage.onload = () => {
+      const img = new Image();
 
-      preview.style.display = "block";
+      img.src = event.target.result;
 
-      previewImg.src = uploadedImage.src;
+      img.onload = () => {
 
-      resizeWidth.value = uploadedImage.width;
+        if(index === 0){
 
-      resizeHeight.value = uploadedImage.height;
+          setActiveImage(img,file,index);
 
-      originalInfo.innerHTML =
-        `
-        Original:
-        ${uploadedImage.width} x ${uploadedImage.height}
-        • ${(file.size / 1024 / 1024).toFixed(2)} MB
-        `;
+        }
+
+        const div =
+          document.createElement("div");
+
+        div.className = "batch-item";
+
+        if(index === 0){
+          div.classList.add("active");
+        }
+
+        div.innerHTML =
+          `
+          <img src="${img.src}">
+          `;
+
+        div.addEventListener("click",() => {
+
+          document
+            .querySelectorAll(".batch-item")
+            .forEach(el =>
+              el.classList.remove("active")
+            );
+
+          div.classList.add("active");
+
+          setActiveImage(img,file,index);
+
+        });
+
+        batchGrid.appendChild(div);
+
+      };
 
     };
 
-  };
+    reader.readAsDataURL(file);
 
-  reader.readAsDataURL(file);
+  });
 
 });
 
@@ -993,6 +1109,27 @@ function showIsland(title,desc){
 }
 
 /* =========================
+   ACTIVE IMAGE
+========================= */
+
+function setActiveImage(img,file,index){
+  uploadedImage = img;
+  originalFile = file;
+  activeIndex = index;
+  preview.style.display = "block";
+  previewImg.src = img.src;
+  cropperImage.src = img.src;
+  resizeWidth.value = img.width;
+  resizeHeight.value = img.height;
+  originalInfo.innerHTML =
+    `
+    Original:
+    ${img.width} x ${img.height}
+    • ${(file.size / 1024 / 1024).toFixed(2)} MB
+    `;
+}
+
+/* =========================
    PROCESS IMAGE
 ========================= */
 
@@ -1034,6 +1171,60 @@ quality
 );
 
 }
+
+/* =========================
+   CROPPER
+========================= */
+
+cropStartBtn.addEventListener("click",() => {
+
+  if(cropper){
+    cropper.destroy();
+  }
+
+  cropper = new Cropper(cropperImage,{
+
+    aspectRatio:NaN,
+
+    viewMode:1,
+
+    dragMode:"move",
+
+    autoCropArea:1,
+
+    responsive:true,
+
+    background:false
+
+  });
+
+  showIsland(
+    "Crop Mode",
+    "Cropper activated"
+  );
+
+});
+
+cropApplyBtn.addEventListener("click",() => {
+  if(!cropper) return;
+
+  const canvas =
+    cropper.getCroppedCanvas();
+  const cropped =
+    canvas.toDataURL("image/jpeg");
+
+  previewImg.src = cropped;
+  uploadedImage = new Image();
+  uploadedImage.src = cropped;
+  cropper.destroy();
+  cropper = null;
+
+  showIsland(
+    "Crop Applied",
+    "Image cropped successfully"
+  );
+
+});
 
 /* =========================
    DOWNLOAD
