@@ -270,6 +270,11 @@ nav{
   transition:.3s;
 }
 
+.tool-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
 #downloadBtn{
   display:none;
 }
@@ -460,6 +465,25 @@ footer{
   width:20px;
   height:20px;
   color:white;
+}
+
+/* =========================
+   ISLAND LOADING
+========================= */
+
+.island-loading{
+  width:20px;
+  height:20px;
+  border:2px solid rgba(255,255,255,.25);
+  border-top-color:white;
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
 }
 
 .island-content h4{
@@ -1713,19 +1737,43 @@ compressBtn.addEventListener("click", () => {
    DYNAMIC ISLAND
 ========================= */
 
-function showIsland(title,desc){
+function showIsland(title,desc,loading=false){
 
   islandTitle.innerText = title;
 
   islandDesc.innerText = desc;
 
+  const iconWrap =
+    document.querySelector(".island-icon");
+
+  if(loading){
+
+    iconWrap.innerHTML =
+      `<div class="island-loading"></div>`;
+
+  }else{
+
+    iconWrap.innerHTML =
+      `<i data-feather="check"></i>`;
+
+    feather.replace();
+
+  }
+
   dynamicIsland.classList.add("show");
 
-  setTimeout(() => {
+  clearTimeout(dynamicIsland.hideTimer);
 
-    dynamicIsland.classList.remove("show");
+  if(!loading){
 
-  },3000);
+    dynamicIsland.hideTimer =
+      setTimeout(() => {
+
+        dynamicIsland.classList.remove("show");
+
+      },3000);
+
+  }
 
 }
 
@@ -1872,47 +1920,108 @@ document
 
 function processImage(width,height,quality){
 
-  const canvas = document.createElement("canvas");
-
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = width;
-
-  canvas.height = height;
-
-  ctx.drawImage(uploadedImage,0,0,width,height);
-
-  const format = exportFormat.value;
-
-  processedImage = canvas.toDataURL(format, quality);
-
-  previewImg.src = processedImage;
-
-  // SIZE ESTIMATION
-  const base64Length =
-    processedImage.length - 
-    (`data:${format};base64,`).length;
-
-  const sizeInBytes =
-    Math.ceil((base64Length * 3) / 4);
-
-  const sizeMB =
-    (sizeInBytes / 1024 / 1024).toFixed(2);
-
-  resultInfo.innerHTML =
-  `
-  Result:
-  ${width} x ${height}
-  • ${sizeMB} MB
-  `;
-
-  // SHOW DOWNLOAD BUTTON
-  downloadBtn.style.display = "block";
+  if(!uploadedImage) return;
 
   showIsland(
-    "Image Ready",
-    "Your image processed successfully"
+    "Processing",
+    "AI sedang memproses gambar...",
+    true
   );
+
+  resizeBtn.disabled = true;
+  compressBtn.disabled = true;
+
+  setTimeout(() => {
+
+    const canvas =
+      document.createElement("canvas");
+
+    const ctx =
+      canvas.getContext("2d");
+
+    canvas.width = width;
+
+    canvas.height = height;
+
+    ctx.drawImage(
+      uploadedImage,
+      0,
+      0,
+      width,
+      height
+    );
+
+    const format =
+      exportFormat.value;
+
+    processedImage =
+      canvas.toDataURL(
+        format,
+        quality
+      );
+
+    previewImg.src =
+      processedImage;
+
+    // ESTIMATION
+
+    const base64Length =
+      processedImage.length -
+      (`data:${format};base64,`).length;
+
+    const sizeInBytes =
+      Math.ceil(
+        (base64Length * 3) / 4
+      );
+
+    const sizeMB =
+      (
+        sizeInBytes /
+        1024 /
+        1024
+      ).toFixed(2);
+
+    resultInfo.innerHTML =
+    `
+    Result:
+    ${width} x ${height}
+    • ${sizeMB} MB
+    `;
+
+    // SHOW DOWNLOAD BUTTON
+
+    downloadBtn.style.display =
+      "block";
+
+    // AUTO OPEN EXPORT TAB
+
+    tabBtns.forEach(el =>
+      el.classList.remove("active")
+    );
+
+    toolContents.forEach(el =>
+      el.classList.remove("active")
+    );
+
+    document
+      .querySelector(
+        `[data-tab="exportTab"]`
+      )
+      .classList.add("active");
+
+    document
+      .getElementById("exportTab")
+      .classList.add("active");
+
+    resizeBtn.disabled = false;
+    compressBtn.disabled = false;
+
+    showIsland(
+      "Image Ready",
+      "Image berhasil diproses"
+    );
+
+  },1200);
 
 }
 
