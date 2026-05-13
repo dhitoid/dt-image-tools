@@ -825,18 +825,150 @@ footer{
   margin-top:18px;
 }
 
-/* MOBILE */
+/* =========================
+   MOBILE FIX
+========================= */
 
-@media(max-width:768px){
+@media (max-width: 768px){
+
+  body{
+    overflow-x:hidden;
+  }
+
+  nav{
+    position:fixed;
+    width:100%;
+  }
+
+  .nav-wrap{
+    padding:14px 16px;
+  }
+
+  .logo{
+    font-size:18px;
+  }
+
+  .nav-btn{
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:13px;
+  }
+
+  .hero{
+    min-height:auto;
+    padding:
+      110px 16px 40px;
+  }
+
+  .hero-wrap{
+    grid-template-columns:1fr;
+    gap:24px;
+  }
+
+  .hero-text h1{
+    font-size:56px;
+    line-height:.95;
+    letter-spacing:-2px;
+  }
+
+  .hero-text p{
+    font-size:16px;
+    line-height:1.7;
+    margin-bottom:24px;
+  }
+
+  .hero-actions{
+    width:100%;
+  }
+
+  .primary-btn,
+  .secondary-btn{
+    flex:1;
+    justify-content:center;
+    text-align:center;
+    padding:16px;
+    font-size:15px;
+  }
+
+  .tool-box{
+    padding:16px;
+    border-radius:24px;
+  }
+
+  .upload{
+    padding:40px 16px;
+    border-radius:20px;
+  }
+
+  .upload h3{
+    font-size:28px;
+  }
+
+  .workspace{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  .layer-sidebar{
+    width:100%;
+    order:2;
+  }
+
+  .editor-stage{
+    width:100%;
+    order:1;
+  }
+
+  .editor-panel{
+    width:100%;
+    order:3;
+    padding:18px;
+  }
+
+  .canvas-wrap{
+    padding:14px;
+    border-radius:24px;
+  }
+
+  .canvas-wrap img{
+    border-radius:18px;
+  }
 
   .tool-tabs{
-    overflow:auto;
+    overflow-x:auto;
     flex-wrap:nowrap;
-    padding-bottom:6px;
+    padding-bottom:8px;
+    scrollbar-width:none;
+  }
+
+  .tool-tabs::-webkit-scrollbar{
+    display:none;
   }
 
   .tab-btn{
-    min-width:140px;
+    min-width:130px;
+    flex:none;
+    font-size:14px;
+  }
+
+  .batch-grid{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .install-pwa{
+    width:58px;
+    height:58px;
+    bottom:20px;
+    right:20px;
+    border-radius:18px;
+  }
+
+  .dynamic-island{
+    width:92%;
+    min-width:auto;
+    top:14px;
   }
 
 }
@@ -1091,7 +1223,7 @@ footer{
 
       <h4>Layer Manager</h4>
 
-      <button class="tool-btn full-btn" id="addLayerBtn">
+      <button class="tool-btn full-btn" id="addLayerBtn2">
         Add New Layer
       </button>
 
@@ -1302,6 +1434,27 @@ const layerList =
 
 const addLayerBtn =
   document.getElementById("addLayerBtn");
+  
+const addLayerBtn2 =
+  document.getElementById("addLayerBtn2");
+
+addLayerBtn2.addEventListener("click",() => {
+
+  if(!uploadedImage) return;
+
+  layers.push({
+    name:`Layer ${layers.length + 1}`,
+    src:previewImg.src
+  });
+
+  renderLayers();
+
+  showIsland(
+    "Layer Added",
+    "New layer created"
+  );
+
+});
 
 /* =========================
    QUALITY SLIDER
@@ -1568,27 +1721,22 @@ function processImage(width,height,quality){
     const sizeMB =
       (blob.size / 1024 / 1024).toFixed(2);
 
-resultInfo.innerHTML =
-`
-Result:
-${width} x ${height}
-• ${sizeMB} MB
-`;
+    resultInfo.innerHTML =
+    `
+    Result:
+    ${width} x ${height}
+    • ${sizeMB} MB
+    `;
 
-showIsland(
-  "Image Ready",
-  "Your image processed successfully"
-);
-      `
-      Result:
-      ${width} x ${height}
-      • ${sizeMB} MB
-      `;
+    showIsland(
+      "Image Ready",
+      "Your image processed successfully"
+    );
 
   },
-exportFormat.value,
-quality
-);
+  exportFormat.value,
+  quality
+  );
 
 }
 
