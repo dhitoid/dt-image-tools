@@ -343,6 +343,66 @@ footer{
 
 }
 
+/* =========================
+   EDITOR PANEL
+========================= */
+
+.editor-panel{
+  margin-top:20px;
+}
+
+.input-group{
+  margin-bottom:18px;
+}
+
+.input-group label{
+  display:block;
+  margin-bottom:10px;
+  color:#cbd5e1;
+  font-size:14px;
+}
+
+.input-group input[type="number"]{
+  width:100%;
+  padding:14px;
+  border:none;
+  outline:none;
+  border-radius:16px;
+  background:rgba(255,255,255,.06);
+  color:white;
+  font-size:15px;
+}
+
+.range-wrap{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.range-wrap input{
+  flex:1;
+}
+
+.range-wrap span{
+  min-width:55px;
+  text-align:right;
+  color:#67e8f9;
+  font-weight:700;
+}
+
+.image-info{
+  margin-top:24px;
+  padding:18px;
+  border-radius:18px;
+  background:rgba(255,255,255,.04);
+}
+
+.image-info p{
+  color:#94a3b8;
+  margin-bottom:8px;
+  font-size:14px;
+}
+
 </style>
 </head>
 <body>
@@ -393,16 +453,61 @@ footer{
         <p>Drag & drop atau klik untuk upload</p>
       </label>
 
-      <div class="preview" id="preview">
-        <img id="previewImg">
+<div class="preview" id="preview">
 
-        <div class="tools">
-          <button class="tool-btn">Resize</button>
-          <button class="tool-btn">Compress</button>
-          <button class="tool-btn">Convert</button>
-          <button class="tool-btn">Crop</button>
-        </div>
+  <img id="previewImg">
+
+  <div class="editor-panel">
+
+    <div class="input-group">
+      <label>Width</label>
+      <input type="number" id="resizeWidth" placeholder="1920">
+    </div>
+
+    <div class="input-group">
+      <label>Height</label>
+      <input type="number" id="resizeHeight" placeholder="1080">
+    </div>
+
+    <div class="input-group">
+      <label>Compression Quality</label>
+
+      <div class="range-wrap">
+        <input
+          type="range"
+          min="0.1"
+          max="1"
+          step="0.1"
+          value="0.8"
+          id="qualityRange"
+        >
+
+        <span id="qualityValue">80%</span>
       </div>
+    </div>
+
+    <div class="tools">
+      <button class="tool-btn" id="resizeBtn">
+        Resize Image
+      </button>
+
+      <button class="tool-btn" id="compressBtn">
+        Compress Image
+      </button>
+
+      <button class="tool-btn" id="downloadBtn">
+        Download
+      </button>
+    </div>
+
+    <div class="image-info">
+      <p id="originalInfo"></p>
+      <p id="resultInfo"></p>
+    </div>
+
+  </div>
+
+</div>
 
     </div>
 
@@ -462,9 +567,58 @@ footer{
 
 feather.replace();
 
+/* =========================
+   ELEMENTS
+========================= */
+
 const fileInput = document.getElementById("fileInput");
+
 const preview = document.getElementById("preview");
+
 const previewImg = document.getElementById("previewImg");
+
+const resizeBtn = document.getElementById("resizeBtn");
+
+const compressBtn = document.getElementById("compressBtn");
+
+const downloadBtn = document.getElementById("downloadBtn");
+
+const resizeWidth = document.getElementById("resizeWidth");
+
+const resizeHeight = document.getElementById("resizeHeight");
+
+const qualityRange = document.getElementById("qualityRange");
+
+const qualityValue = document.getElementById("qualityValue");
+
+const originalInfo = document.getElementById("originalInfo");
+
+const resultInfo = document.getElementById("resultInfo");
+
+/* =========================
+   STATE
+========================= */
+
+let uploadedImage = null;
+
+let processedImage = null;
+
+let originalFile = null;
+
+/* =========================
+   QUALITY SLIDER
+========================= */
+
+qualityRange.addEventListener("input", () => {
+
+  qualityValue.innerText =
+    Math.round(qualityRange.value * 100) + "%";
+
+});
+
+/* =========================
+   FILE UPLOAD
+========================= */
 
 fileInput.addEventListener("change", e => {
 
@@ -472,17 +626,130 @@ fileInput.addEventListener("change", e => {
 
   if(!file) return;
 
+  originalFile = file;
+
   const reader = new FileReader();
 
   reader.onload = function(event){
 
-    preview.style.display = "block";
+    uploadedImage = new Image();
 
-    previewImg.src = event.target.result;
+    uploadedImage.src = event.target.result;
+
+    uploadedImage.onload = () => {
+
+      preview.style.display = "block";
+
+      previewImg.src = uploadedImage.src;
+
+      resizeWidth.value = uploadedImage.width;
+
+      resizeHeight.value = uploadedImage.height;
+
+      originalInfo.innerHTML =
+        `
+        Original:
+        ${uploadedImage.width} x ${uploadedImage.height}
+        • ${(file.size / 1024 / 1024).toFixed(2)} MB
+        `;
+
+    };
+
+  };
+
+  reader.readAsDataURL(file);
+
+});
+
+/* =========================
+   RESIZE FUNCTION
+========================= */
+
+resizeBtn.addEventListener("click", () => {
+
+  if(!uploadedImage) return;
+
+  processImage(
+    parseInt(resizeWidth.value),
+    parseInt(resizeHeight.value),
+    1
+  );
+
+});
+
+/* =========================
+   COMPRESS FUNCTION
+========================= */
+
+compressBtn.addEventListener("click", () => {
+
+  if(!uploadedImage) return;
+
+  processImage(
+    uploadedImage.width,
+    uploadedImage.height,
+    parseFloat(qualityRange.value)
+  );
+
+});
+
+/* =========================
+   PROCESS IMAGE
+========================= */
+
+function processImage(width,height,quality){
+
+  const canvas = document.createElement("canvas");
+
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = width;
+
+  canvas.height = height;
+
+  ctx.drawImage(uploadedImage,0,0,width,height);
+
+  canvas.toBlob(blob => {
+
+    processedImage = URL.createObjectURL(blob);
+
+    previewImg.src = processedImage;
+
+    const sizeMB =
+      (blob.size / 1024 / 1024).toFixed(2);
+
+    resultInfo.innerHTML =
+      `
+      Result:
+      ${width} x ${height}
+      • ${sizeMB} MB
+      `;
+
+  },"image/jpeg",quality);
+
+}
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+downloadBtn.addEventListener("click", () => {
+
+  if(!processedImage){
+
+    alert("Process image first!");
+
+    return;
 
   }
 
-  reader.readAsDataURL(file);
+  const a = document.createElement("a");
+
+  a.href = processedImage;
+
+  a.download = "dt-image-tools.jpg";
+
+  a.click();
 
 });
 
