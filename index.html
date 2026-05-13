@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>DT Image Tools</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/feather-icons"></script>
+
+<style>
+
+/* =========================
+   RESET
+========================= */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:#060816;
+  color:white;
+  overflow-x:hidden;
+}
+
+/* =========================
+   AURORA BACKGROUND
+========================= */
+
+.bg{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  z-index:-2;
+}
+
+.blob{
+  position:absolute;
+  width:500px;
+  height:500px;
+  border-radius:50%;
+  filter:blur(120px);
+  opacity:.35;
+  animation:float 14s infinite ease-in-out;
+}
+
+.blob:nth-child(1){
+  background:#4f46e5;
+  top:-100px;
+  left:-100px;
+}
+
+.blob:nth-child(2){
+  background:#06b6d4;
+  bottom:-100px;
+  right:-100px;
+  animation-delay:4s;
+}
+
+.blob:nth-child(3){
+  background:#9333ea;
+  top:40%;
+  left:40%;
+  animation-delay:8s;
+}
+
+@keyframes float{
+  0%,100%{
+    transform:translateY(0px) translateX(0px);
+  }
+  50%{
+    transform:translateY(-40px) translateX(20px);
+  }
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:blur(20px);
+  background:rgba(10,10,20,.5);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.nav-wrap{
+  max-width:1200px;
+  margin:auto;
+  padding:18px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:800;
+  background:linear-gradient(90deg,#fff,#7dd3fc);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.nav-btn{
+  padding:12px 18px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:120px 20px 80px;
+}
+
+.hero-wrap{
+  max-width:1200px;
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  align-items:center;
+}
+
+.hero-text h1{
+  font-size:68px;
+  line-height:1;
+  margin-bottom:24px;
+}
+
+.gradient{
+  background:linear-gradient(90deg,#67e8f9,#a78bfa);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.hero-text p{
+  color:#94a3b8;
+  line-height:1.8;
+  font-size:18px;
+  margin-bottom:32px;
+}
+
+.hero-actions{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.primary-btn{
+  padding:16px 24px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.secondary-btn{
+  padding:16px 24px;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  color:white;
+  cursor:pointer;
+}
+
+/* =========================
+   TOOL BOX
+========================= */
+
+.tool-box{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(24px);
+  border-radius:30px;
+  padding:24px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+
+.upload{
+  border:2px dashed rgba(255,255,255,.15);
+  border-radius:24px;
+  padding:60px 20px;
+  text-align:center;
+  transition:.3s;
+  cursor:pointer;
+}
+
+.upload:hover{
+  border-color:#67e8f9;
+  background:rgba(255,255,255,.03);
+}
+
+.upload i{
+  width:52px;
+  height:52px;
+  margin-bottom:20px;
+  color:#67e8f9;
+}
+
+.upload h3{
+  margin-bottom:10px;
+  font-size:22px;
+}
+
+.upload p{
+  color:#94a3b8;
+}
+
+.preview{
+  margin-top:24px;
+  display:none;
+}
+
+.preview img{
+  width:100%;
+  border-radius:20px;
+  margin-bottom:20px;
+}
+
+.tools{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+
+.tool-btn{
+  padding:16px;
+  border-radius:18px;
+  border:none;
+  background:rgba(255,255,255,.05);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.tool-btn:hover{
+  transform:translateY(-4px);
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+}
+
+/* =========================
+   FEATURES
+========================= */
+
+.features{
+  padding:100px 20px;
+}
+
+.section-title{
+  text-align:center;
+  font-size:42px;
+  margin-bottom:60px;
+}
+
+.feature-grid{
+  max-width:1200px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:24px;
+}
+
+.card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:28px;
+  padding:30px;
+  transition:.4s;
+}
+
+.card:hover{
+  transform:translateY(-8px);
+  border-color:#67e8f9;
+}
+
+.card i{
+  width:42px;
+  height:42px;
+  color:#67e8f9;
+  margin-bottom:20px;
+}
+
+.card h3{
+  margin-bottom:14px;
+  font-size:22px;
+}
+
+.card p{
+  color:#94a3b8;
+  line-height:1.7;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+  padding:40px 20px;
+  text-align:center;
+  color:#64748b;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:900px){
+
+.hero-wrap{
+  grid-template-columns:1fr;
+}
+
+.hero-text h1{
+  font-size:52px;
+}
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+</div>
+
+<nav>
+  <div class="nav-wrap">
+    <div class="logo">DT Image Tools</div>
+    <button class="nav-btn">Launch App</button>
+  </div>
+</nav>
+
+<section class="hero">
+
+  <div class="hero-wrap">
+
+    <div class="hero-text">
+      <h1>
+        Professional
+        <span class="gradient">Image Tools</span>
+      </h1>
+
+      <p>
+        Resize, compress, crop, convert, dan optimize gambar
+        dengan UI modern ala startup premium.
+      </p>
+
+      <div class="hero-actions">
+        <button class="primary-btn">Start Editing</button>
+        <button class="secondary-btn">Explore Tools</button>
+      </div>
+    </div>
+
+    <div class="tool-box">
+
+      <label class="upload">
+        <input type="file" id="fileInput" hidden accept="image/*">
+
+        <i data-feather="upload-cloud"></i>
+
+        <h3>Upload Your Image</h3>
+
+        <p>Drag & drop atau klik untuk upload</p>
+      </label>
+
+      <div class="preview" id="preview">
+        <img id="previewImg">
+
+        <div class="tools">
+          <button class="tool-btn">Resize</button>
+          <button class="tool-btn">Compress</button>
+          <button class="tool-btn">Convert</button>
+          <button class="tool-btn">Crop</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="features">
+
+  <h2 class="section-title">
+    Premium Features
+  </h2>
+
+  <div class="feature-grid">
+
+    <div class="card">
+      <i data-feather="maximize"></i>
+      <h3>Resize Image</h3>
+      <p>
+        Resize otomatis tanpa mengurangi kualitas gambar.
+      </p>
+    </div>
+
+    <div class="card">
+      <i data-feather="archive"></i>
+      <h3>Compress Photo</h3>
+      <p>
+        Kompres gambar cepat dengan hasil tetap tajam.
+      </p>
+    </div>
+
+    <div class="card">
+      <i data-feather="refresh-cw"></i>
+      <h3>Convert Format</h3>
+      <p>
+        Convert JPG, PNG, WEBP dengan sekali klik.
+      </p>
+    </div>
+
+    <div class="card">
+      <i data-feather="smartphone"></i>
+      <h3>PWA Ready</h3>
+      <p>
+        Bisa di install seperti aplikasi Android & iPhone.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+<footer>
+  © 2026 DT Image Tools — Modern AI Utilities
+</footer>
+
+<script>
+
+feather.replace();
+
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+const previewImg = document.getElementById("previewImg");
+
+fileInput.addEventListener("change", e => {
+
+  const file = e.target.files[0];
+
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(event){
+
+    preview.style.display = "block";
+
+    previewImg.src = event.target.result;
+
+  }
+
+  reader.readAsDataURL(file);
+
+});
+
+</script>
+
+</body>
+</html>
