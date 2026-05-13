@@ -245,6 +245,10 @@ nav{
 
 .preview img{
   width:100%;
+  max-width:100%;
+  height:auto;
+  display:block;
+  object-fit:contain;
   border-radius:20px;
   margin-bottom:20px;
 }
@@ -726,7 +730,21 @@ footer{
 
 .canvas-wrap img{
   width:100%;
+  max-width:100%;
+  max-height:70vh;
+  object-fit:contain;
+  display:block;
+  margin:auto;
   border-radius:20px;
+}
+
+.workspace,
+.editor-stage,
+.canvas-wrap,
+.preview{
+  min-width:0;
+  width:100%;
+  overflow:hidden;
 }
 
 /* =========================
@@ -973,6 +991,40 @@ footer{
 
 }
 
+.tool-select-top{
+  margin-bottom:24px;
+}
+
+.tool-select-top h3{
+  margin-bottom:16px;
+  font-size:20px;
+}
+
+.feature-pick{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.feature-btn{
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+  font-weight:600;
+}
+
+.feature-btn:hover{
+  transform:translateY(-3px);
+}
+
+.feature-btn.active{
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+}
+
 </style>
 </head>
 <body>
@@ -1012,6 +1064,36 @@ footer{
     </div>
 
     <div class="tool-box">
+      
+      <div class="tool-select-top">
+
+  <h3>Pilih Fitur</h3>
+
+  <div class="feature-pick">
+
+    <button class="feature-btn active" data-feature="resize">
+      <i data-feather="maximize"></i>
+      Resize
+    </button>
+
+    <button class="feature-btn" data-feature="compress">
+      <i data-feather="archive"></i>
+      Compress
+    </button>
+
+    <button class="feature-btn" data-feature="crop">
+      <i data-feather="crop"></i>
+      Crop
+    </button>
+
+    <button class="feature-btn" data-feature="export">
+      <i data-feather="download"></i>
+      Convert
+    </button>
+
+  </div>
+
+</div>
 
       <label class="upload">
         <input type="file"   id="fileInput"   hidden   accept="image/*"   multiple >
@@ -1693,6 +1775,35 @@ function setActiveImage(img,file,index){
   ];
 
   renderLayers();
+  
+  /* AUTO OPEN TOOL */
+
+const mapTabs = {
+  resize:"resizeTab",
+  compress:"compressTab",
+  crop:"cropTab",
+  export:"exportTab"
+};
+
+tabBtns.forEach(el =>
+  el.classList.remove("active")
+);
+
+toolContents.forEach(el =>
+  el.classList.remove("active")
+);
+
+document
+  .querySelector(
+    `[data-tab="${mapTabs[selectedFeature]}"]`
+  )
+  .classList.add("active");
+
+document
+  .getElementById(
+    mapTabs[selectedFeature]
+  )
+  .classList.add("active");
 
 }
 
@@ -1781,9 +1892,10 @@ cropApplyBtn.addEventListener("click",() => {
   const cropped =
     canvas.toDataURL("image/jpeg");
 
-  previewImg.src = cropped;
-  uploadedImage = new Image();
-  uploadedImage.src = cropped;
+previewImg.src = cropped;
+processedImage = cropped;
+uploadedImage = new Image();
+uploadedImage.src = cropped;
   cropper.destroy();
   cropper = null;
 
@@ -1800,17 +1912,20 @@ cropApplyBtn.addEventListener("click",() => {
 
 downloadBtn.addEventListener("click", () => {
 
-  if(!processedImage){
+const imageToDownload =
+  processedImage || previewImg.src;
 
-    alert("Process image first!");
+if(!imageToDownload){
 
-    return;
+  alert("No image available");
 
-  }
+  return;
+
+}
 
   const a = document.createElement("a");
 
-  a.href = processedImage;
+  a.href = imageToDownload;
 
  let ext = "jpg";
 
@@ -1919,6 +2034,32 @@ tabBtns.forEach(btn => {
         btn.dataset.tab
       )
       .classList.add("active");
+
+  });
+
+});
+
+/* =========================
+   FEATURE SELECT
+========================= */
+
+let selectedFeature = "resize";
+
+const featureBtns =
+  document.querySelectorAll(".feature-btn");
+
+featureBtns.forEach(btn => {
+
+  btn.addEventListener("click",() => {
+
+    featureBtns.forEach(el =>
+      el.classList.remove("active")
+    );
+
+    btn.classList.add("active");
+
+    selectedFeature =
+      btn.dataset.feature;
 
   });
 
