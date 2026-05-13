@@ -270,6 +270,10 @@ nav{
   transition:.3s;
 }
 
+#downloadBtn{
+  display:none;
+}
+
 .tool-btn:hover{
   transform:translateY(-4px);
   background:linear-gradient(135deg,#4f46e5,#06b6d4);
@@ -736,6 +740,10 @@ footer{
   display:block;
   margin:auto;
   border-radius:20px;
+
+  /* FIX OVERFLOW */
+  height:auto;
+  overflow:hidden;
 }
 
 .workspace,
@@ -1023,6 +1031,55 @@ footer{
 
 .feature-btn.active{
   background:linear-gradient(135deg,#4f46e5,#06b6d4);
+}
+
+/* =========================
+   HARD OVERFLOW FIX
+========================= */
+
+img,
+canvas,
+.cropper-container,
+.cropper-wrap,
+.canvas-wrap,
+.workspace,
+.editor-stage,
+.preview,
+.tool-box{
+  max-width:100%;
+  overflow:hidden;
+}
+
+.cropper-container{
+  width:100% !important;
+}
+
+.cropper-wrap img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+.batch-item img{
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+}
+
+/* MOBILE EXTRA FIX */
+
+@media(max-width:768px){
+
+  .hero-wrap,
+  .workspace{
+    width:100%;
+    overflow:hidden;
+  }
+
+  .tool-box{
+    width:100%;
+  }
+
 }
 
 </style>
@@ -1751,6 +1808,8 @@ function setActiveImage(img,file,index){
   activeIndex = index;
 
   preview.style.display = "block";
+  
+  downloadBtn.style.display = "none";
 
   previewImg.src = img.src;
 
@@ -1823,30 +1882,36 @@ function processImage(width,height,quality){
 
   ctx.drawImage(uploadedImage,0,0,width,height);
 
-  canvas.toBlob(blob => {
+  const format = exportFormat.value;
 
-    processedImage = URL.createObjectURL(blob);
+  processedImage = canvas.toDataURL(format, quality);
 
-    previewImg.src = processedImage;
+  previewImg.src = processedImage;
 
-    const sizeMB =
-      (blob.size / 1024 / 1024).toFixed(2);
+  // SIZE ESTIMATION
+  const base64Length =
+    processedImage.length - 
+    (`data:${format};base64,`).length;
 
-    resultInfo.innerHTML =
-    `
-    Result:
-    ${width} x ${height}
-    • ${sizeMB} MB
-    `;
+  const sizeInBytes =
+    Math.ceil((base64Length * 3) / 4);
 
-    showIsland(
-      "Image Ready",
-      "Your image processed successfully"
-    );
+  const sizeMB =
+    (sizeInBytes / 1024 / 1024).toFixed(2);
 
-  },
-  exportFormat.value,
-  quality
+  resultInfo.innerHTML =
+  `
+  Result:
+  ${width} x ${height}
+  • ${sizeMB} MB
+  `;
+
+  // SHOW DOWNLOAD BUTTON
+  downloadBtn.style.display = "block";
+
+  showIsland(
+    "Image Ready",
+    "Your image processed successfully"
   );
 
 }
@@ -1912,34 +1977,77 @@ uploadedImage.src = cropped;
 
 downloadBtn.addEventListener("click", () => {
 
-const imageToDownload =
-  processedImage || previewImg.src;
+  const imageToDownload =
+    processedImage || previewImg.src;
 
-if(!imageToDownload){
+  if(!imageToDownload){
+    return;
+  }
 
-  alert("No image available");
+  let ext = "jpg";
 
-  return;
+  if(exportFormat.value === "image/png"){
+    ext = "png";
+  }
 
-}
+  if(exportFormat.value === "image/webp"){
+    ext = "webp";
+  }
 
-  const a = document.createElement("a");
+  // iPhone Safari Fix
+  const newTab = window.open();
 
-  a.href = imageToDownload;
+  newTab.document.write(`
+    <html>
+      <head>
+        <title>Download Image</title>
+        <style>
+          body{
+            margin:0;
+            background:#000;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            flex-direction:column;
+            font-family:sans-serif;
+            color:white;
+          }
+          img{
+            max-width:90%;
+            max-height:80vh;
+            border-radius:20px;
+          }
+          a{
+            margin-top:20px;
+            padding:14px 24px;
+            border-radius:14px;
+            background:#4f46e5;
+            color:white;
+            text-decoration:none;
+            font-weight:bold;
+          }
+        </style>
+      </head>
+      <body>
 
- let ext = "jpg";
+        <img src="${imageToDownload}">
 
-if(exportFormat.value === "image/png"){
-  ext = "png";
-}
+        <a
+          href="${imageToDownload}"
+          download="dt-image-tools.${ext}"
+        >
+          Download Image
+        </a>
 
-if(exportFormat.value === "image/webp"){
-  ext = "webp";
-}
+      </body>
+    </html>
+  `);
 
-a.download = `dt-image-tools.${ext}`;
-
-  a.click();
+  showIsland(
+    "Download Ready",
+    "Image ready to save"
+  );
 
 });
 
