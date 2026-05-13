@@ -762,6 +762,85 @@ footer{
 
 }
 
+/* =========================
+   TOOL TABS
+========================= */
+
+.tool-tabs{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:24px;
+}
+
+.tab-btn{
+  flex:1;
+  min-width:120px;
+  padding:14px;
+  border:none;
+  border-radius:16px;
+  background:rgba(255,255,255,.05);
+  color:#94a3b8;
+  cursor:pointer;
+  transition:.3s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  font-weight:600;
+}
+
+.tab-btn i{
+  width:18px;
+  height:18px;
+}
+
+.tab-btn.active{
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+  color:white;
+}
+
+.tool-content{
+  display:none;
+}
+
+.tool-content.active{
+  display:block;
+  animation:fade .4s ease;
+}
+
+@keyframes fade{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.full-btn{
+  width:100%;
+  margin-top:18px;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+  .tool-tabs{
+    overflow:auto;
+    flex-wrap:nowrap;
+    padding-bottom:6px;
+  }
+
+  .tab-btn{
+    min-width:140px;
+  }
+
+}
+
 </style>
 </head>
 <body>
@@ -852,102 +931,169 @@ footer{
 
     </main>
 
-    <!-- CONTROL PANEL -->
+<!-- CONTROL PANEL -->
 
-    <aside class="editor-panel">
+<aside class="editor-panel">
 
-      <div class="panel-section">
+  <!-- TOOL NAVIGATION -->
 
-        <h4>Resize</h4>
+  <div class="tool-tabs">
 
-        <div class="input-group">
-          <label>Width</label>
-          <input type="number" id="resizeWidth">
-        </div>
+    <button class="tab-btn active" data-tab="resizeTab">
+      <i data-feather="maximize"></i>
+      Resize
+    </button>
 
-        <div class="input-group">
-          <label>Height</label>
-          <input type="number" id="resizeHeight">
-        </div>
+    <button class="tab-btn" data-tab="compressTab">
+      <i data-feather="archive"></i>
+      Compress
+    </button>
+
+    <button class="tab-btn" data-tab="cropTab">
+      <i data-feather="crop"></i>
+      Crop
+    </button>
+
+    <button class="tab-btn" data-tab="exportTab">
+      <i data-feather="download"></i>
+      Export
+    </button>
+
+    <button class="tab-btn" data-tab="layerTab">
+      <i data-feather="layers"></i>
+      Layers
+    </button>
+
+  </div>
+
+  <!-- =========================
+       RESIZE TAB
+  ========================= -->
+
+  <div class="tool-content active" id="resizeTab">
+
+    <div class="panel-section">
+
+      <h4>Resize Image</h4>
+
+      <div class="input-group">
+        <label>Width</label>
+        <input type="number" id="resizeWidth">
+      </div>
+
+      <div class="input-group">
+        <label>Height</label>
+        <input type="number" id="resizeHeight">
+      </div>
+
+      <button class="tool-btn full-btn" id="resizeBtn">
+        Apply Resize
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       COMPRESS TAB
+  ========================= -->
+
+  <div class="tool-content" id="compressTab">
+
+    <div class="panel-section">
+
+      <h4>Compression Quality</h4>
+
+      <div class="range-wrap">
+
+        <input
+          type="range"
+          min="0.1"
+          max="1"
+          step="0.1"
+          value="0.8"
+          id="qualityRange"
+        >
+
+        <span id="qualityValue">80%</span>
 
       </div>
 
-      <div class="panel-section">
+      <button class="tool-btn full-btn" id="compressBtn">
+        Compress Image
+      </button>
 
-        <h4>Compression</h4>
+    </div>
 
-        <div class="range-wrap">
+  </div>
 
-          <input
-            type="range"
-            min="0.1"
-            max="1"
-            step="0.1"
-            value="0.8"
-            id="qualityRange"
-          >
+  <!-- =========================
+       CROP TAB
+  ========================= -->
 
-          <span id="qualityValue">80%</span>
+  <div class="tool-content" id="cropTab">
 
-        </div>
+    <div class="panel-section">
 
-      </div>
+      <h4>Crop Tools</h4>
 
-      <div class="panel-section">
+      <div class="crop-actions">
 
-        <h4>Export</h4>
+        <button class="tool-btn" id="cropStartBtn">
+          Start Crop
+        </button>
 
-        <div class="export-wrap">
-
-          <select id="exportFormat">
-            <option value="image/jpeg">JPG</option>
-            <option value="image/png">PNG</option>
-            <option value="image/webp">WEBP</option>
-          </select>
-
-        </div>
+        <button class="tool-btn" id="cropApplyBtn">
+          Apply Crop
+        </button>
 
       </div>
 
-      <div class="panel-section">
+    </div>
 
-        <h4>Crop</h4>
+  </div>
 
-        <div class="crop-actions">
+  <!-- =========================
+       EXPORT TAB
+  ========================= -->
 
-          <button class="tool-btn" id="cropStartBtn">
-            Start Crop
-          </button>
+  <div class="tool-content" id="exportTab">
 
-          <button class="tool-btn" id="cropApplyBtn">
-            Apply Crop
-          </button>
+    <div class="panel-section">
 
-        </div>
+      <h4>Export Settings</h4>
 
-      </div>
+      <div class="export-wrap">
 
-      <div class="panel-section">
-
-        <h4>Actions</h4>
-
-        <div class="tools">
-
-          <button class="tool-btn" id="resizeBtn">
-            Resize
-          </button>
-
-          <button class="tool-btn" id="compressBtn">
-            Compress
-          </button>
-
-          <button class="tool-btn" id="downloadBtn">
-            Download
-          </button>
-
-        </div>
+        <select id="exportFormat">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+          <option value="image/webp">WEBP</option>
+        </select>
 
       </div>
+
+      <button class="tool-btn full-btn" id="downloadBtn">
+        Download Image
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       LAYER TAB
+  ========================= -->
+
+  <div class="tool-content" id="layerTab">
+
+    <div class="panel-section">
+
+      <h4>Layer Manager</h4>
+
+      <button class="tool-btn full-btn" id="addLayerBtn">
+        Add New Layer
+      </button>
 
       <div class="image-info">
 
@@ -957,7 +1103,11 @@ footer{
 
       </div>
 
-    </aside>
+    </div>
+
+  </div>
+
+</aside>
 
   </div>
 
@@ -1589,6 +1739,40 @@ confirmInstall.addEventListener("click",async() => {
   }
 
   deferredPrompt = null;
+
+});
+
+/* =========================
+   TAB SYSTEM
+========================= */
+
+const tabBtns =
+  document.querySelectorAll(".tab-btn");
+
+const toolContents =
+  document.querySelectorAll(".tool-content");
+
+tabBtns.forEach(btn => {
+
+  btn.addEventListener("click",() => {
+
+    tabBtns.forEach(el =>
+      el.classList.remove("active")
+    );
+
+    toolContents.forEach(el =>
+      el.classList.remove("active")
+    );
+
+    btn.classList.add("active");
+
+    document
+      .getElementById(
+        btn.dataset.tab
+      )
+      .classList.add("active");
+
+  });
 
 });
 
