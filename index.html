@@ -237,6 +237,9 @@ nav{
 }
 
 .upload:hover{
+  transform:translateY(-3px);
+  box-shadow:
+    0 20px 60px rgba(6,182,212,.12);
   border-color:#67e8f9;
   background:rgba(255,255,255,.03);
 }
@@ -258,8 +261,9 @@ nav{
 }
 
 .preview{
-  margin-top:24px;
+  margin-top:30px;
   display:none;
+  animation:fade .5s ease;
 }
 
 .preview img{
@@ -1400,6 +1404,193 @@ canvas{
 
 }
 
+/* =========================
+   NEW UI FLOW
+========================= */
+
+.workflow-header{
+  margin-bottom:28px;
+}
+
+.workflow-badge{
+  display:inline-flex;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(103,232,249,.08);
+  border:1px solid rgba(103,232,249,.2);
+  color:#67e8f9;
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:18px;
+}
+
+.workflow-header h2{
+  font-size:36px;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+
+.workflow-header p{
+  color:#94a3b8;
+  line-height:1.7;
+}
+
+.step-card{
+  padding:22px;
+  border-radius:28px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  margin-bottom:20px;
+}
+
+.step-top{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:20px;
+}
+
+.step-number{
+  width:48px;
+  height:48px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  background:
+  linear-gradient(
+    135deg,
+    #4f46e5,
+    #06b6d4
+  );
+}
+
+.step-top h3{
+  font-size:18px;
+  margin-bottom:4px;
+}
+
+.step-top p{
+  color:#94a3b8;
+  font-size:14px;
+}
+
+.modern-upload{
+  position:relative;
+  overflow:hidden;
+  padding:46px 20px;
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(103,232,249,.08),
+      transparent 70%
+    );
+}
+
+.upload-icon{
+  width:80px;
+  height:80px;
+  margin:auto;
+  margin-bottom:20px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+  linear-gradient(
+    135deg,
+    rgba(79,70,229,.25),
+    rgba(6,182,212,.25)
+  );
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.upload-icon i{
+  width:38px;
+  height:38px;
+}
+
+.upload-tags{
+  margin-top:22px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.upload-tags span{
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.06);
+  font-size:12px;
+  color:#cbd5e1;
+}
+
+.feature-pick{
+  grid-template-columns:repeat(2,1fr);
+}
+
+.feature-btn{
+  min-height:95px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  border:1px solid transparent;
+}
+
+.feature-btn i{
+  width:24px;
+  height:24px;
+}
+
+.feature-btn.active{
+  border-color:rgba(103,232,249,.4);
+  box-shadow:
+    0 10px 30px rgba(6,182,212,.18);
+}
+
+/* =========================
+   CLEAN WORKSPACE
+========================= */
+
+.preview{
+  margin-top:30px;
+}
+
+.workspace{
+  margin-top:0;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:768px){
+
+  .workflow-header h2{
+    font-size:28px;
+  }
+
+  .step-card{
+    padding:18px;
+    border-radius:24px;
+  }
+
+  .feature-btn{
+    min-height:82px;
+    font-size:14px;
+  }
+
+  .modern-upload{
+    padding:36px 16px;
+  }
+
+}
+
 </style>
 </head>
 <body>
@@ -1440,93 +1631,113 @@ canvas{
 
     <div class="tool-box">
       
-      <div class="tool-select-top">
+<!-- =========================
+     TOP WORKFLOW
+========================= -->
 
-  <h3>Pilih Fitur</h3>
+<div class="workflow-header">
+
+  <div class="workflow-badge">
+    AI Powered Editor
+  </div>
+
+  <h2>
+    Edit Your Image
+    <span class="gradient">In Seconds</span>
+  </h2>
+
+  <p>
+    Pilih tool terlebih dahulu lalu upload gambar
+    untuk memulai editing.
+  </p>
+
+</div>
+
+<!-- =========================
+     STEP 1
+========================= -->
+
+<div class="step-card">
+
+  <div class="step-top">
+    <span class="step-number">1</span>
+
+    <div>
+      <h3>Pilih Tool</h3>
+      <p>Choose editing feature</p>
+    </div>
+  </div>
 
   <div class="feature-pick">
 
     <button class="feature-btn active" data-feature="resize">
       <i data-feather="maximize"></i>
-      Resize
+      <span>Resize</span>
     </button>
 
     <button class="feature-btn" data-feature="compress">
       <i data-feather="archive"></i>
-      Compress
+      <span>Compress</span>
     </button>
 
     <button class="feature-btn" data-feature="crop">
       <i data-feather="crop"></i>
-      Crop
+      <span>Crop</span>
     </button>
 
     <button class="feature-btn" data-feature="export">
       <i data-feather="download"></i>
-      Convert
+      <span>Convert</span>
     </button>
 
   </div>
 
 </div>
 
-<div class="workflow">
+<!-- =========================
+     STEP 2
+========================= -->
 
-  <div class="workflow-step active">
-    <span>1</span>
-    <p>Pilih Tool</p>
+<div class="step-card upload-card">
+
+  <div class="step-top">
+    <span class="step-number">2</span>
+
+    <div>
+      <h3>Upload Image</h3>
+      <p>PNG, JPG, WEBP supported</p>
+    </div>
   </div>
 
-  <div class="workflow-line"></div>
+  <label class="upload modern-upload">
 
-  <div class="workflow-step" id="stepUpload">
-    <span>2</span>
-    <p>Upload Image</p>
-  </div>
+    <input
+      type="file"
+      id="fileInput"
+      hidden
+      accept="image/*"
+      multiple
+    >
 
-  <div class="workflow-line"></div>
+    <div class="upload-icon">
+      <i data-feather="image"></i>
+    </div>
 
-  <div class="workflow-step" id="stepProcess">
-    <span>3</span>
-    <p>Process</p>
-  </div>
+    <h3>Drop image here</h3>
 
-  <div class="workflow-line"></div>
+    <p>
+      atau klik untuk upload gambar
+    </p>
 
-  <div class="workflow-step" id="stepDownload">
-    <span>4</span>
-    <p>Download</p>
-  </div>
+    <div class="upload-tags">
 
-</div>
+      <span>Fast</span>
+      <span>AI Ready</span>
+      <span>No Watermark</span>
 
-      <label class="upload">
-        <input type="file"   id="fileInput"   hidden   accept="image/*"   multiple >
+    </div>
 
-        <i data-feather="upload-cloud"></i>
-
-        <h3>Upload Your Image</h3>
-
-        <p>Drag & drop atau klik untuk upload</p>
-      </label>
-      
-      <div class="quick-actions">
-
-  <button class="quick-btn">
-    Instagram Post
-  </button>
-
-  <button class="quick-btn">
-    TikTok Cover
-  </button>
-
-  <button class="quick-btn">
-    YouTube Thumbnail
-  </button>
-
-  <button class="quick-btn">
-    WhatsApp Story
-  </button>
+  </label>
 
 </div>
 
@@ -2298,6 +2509,14 @@ function setActiveImage(img,file,index){
   activeIndex = index;
 
   preview.style.display = "block";
+  
+  document
+.getElementById("stepUpload")
+.classList.add("active");
+
+document
+.getElementById("stepProcess")
+.classList.add("active");
   
   document
   .getElementById("emptyState")
