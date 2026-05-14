@@ -138,7 +138,21 @@ nav{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:120px 20px 80px;
+  padding:140px 20px 80px;
+  position:relative;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(103,232,249,.08),
+      transparent 40%
+    );
+  pointer-events:none;
 }
 
 .hero-wrap{
@@ -200,12 +214,17 @@ nav{
 ========================= */
 
 .tool-box{
-  background:rgba(255,255,255,.05);
+  position:relative;
+  background:rgba(255,255,255,.045);
   border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(24px);
-  border-radius:30px;
+  backdrop-filter:blur(30px);
+  -webkit-backdrop-filter:blur(30px);
+  border-radius:32px;
   padding:24px;
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  box-shadow:
+    0 10px 40px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  overflow:hidden;
 }
 
 .upload{
@@ -246,11 +265,11 @@ nav{
 .preview img{
   width:100%;
   max-width:100%;
-  height:auto;
-  display:block;
+  max-height:70vh;
   object-fit:contain;
-  border-radius:20px;
-  margin-bottom:20px;
+  border-radius:24px;
+  display:block;
+  margin:auto;
 }
 
 .tools{
@@ -268,6 +287,36 @@ nav{
   font-weight:600;
   cursor:pointer;
   transition:.3s;
+}
+
+.primary-btn,
+.secondary-btn,
+.tool-btn,
+.feature-btn,
+.quick-btn,
+.nav-btn{
+  transition:
+    transform .25s ease,
+    opacity .25s ease,
+    background .25s ease;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover,
+.tool-btn:hover,
+.feature-btn:hover,
+.quick-btn:hover,
+.nav-btn:hover{
+  transform:translateY(-2px);
+}
+
+.primary-btn:active,
+.secondary-btn:active,
+.tool-btn:active,
+.feature-btn:active,
+.quick-btn:active,
+.nav-btn:active{
+  transform:scale(.98);
 }
 
 .tool-btn:disabled{
@@ -441,26 +490,47 @@ footer{
 
 .dynamic-island{
   position:fixed;
-  top:20px;
+  top:18px;
   left:50%;
-  transform:translateX(-50%) translateY(-120px);
-  min-width:280px;
-  max-width:90%;
-  padding:14px 18px;
+  transform:
+    translateX(-50%)
+    translateY(-120px)
+    scale(.95);
+
+  min-width:290px;
+  max-width:92%;
+
+  padding:14px 16px;
+
   border-radius:999px;
-  backdrop-filter:blur(30px);
-  background:rgba(20,20,30,.75);
-  border:1px solid rgba(255,255,255,.08);
+
+  backdrop-filter:blur(40px);
+  -webkit-backdrop-filter:blur(40px);
+
+  background:
+    rgba(15,23,42,.72);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
   z-index:99999;
+
   display:flex;
   align-items:center;
   gap:14px;
-  transition:.5s cubic-bezier(.19,1,.22,1);
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
+
+  transition:
+    .55s cubic-bezier(.19,1,.22,1);
+
+  box-shadow:
+    0 10px 40px rgba(0,0,0,.35);
 }
 
 .dynamic-island.show{
-  transform:translateX(-50%) translateY(0);
+  transform:
+    translateX(-50%)
+    translateY(0)
+    scale(1);
 }
 
 /* =========================
@@ -794,11 +864,16 @@ footer{
 
 .canvas-wrap{
   position:relative;
-  background:rgba(255,255,255,.04);
+  background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.08);
   border-radius:30px;
-  padding:20px;
+  padding:18px;
   overflow:hidden;
+  min-height:420px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .canvas-wrap img{
@@ -831,9 +906,12 @@ footer{
 .editor-panel{
   background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08);
-  border-radius:28px;
-  padding:24px;
+  border-radius:30px;
+  padding:22px;
   height:fit-content;
+
+  position:sticky;
+  top:100px;
 }
 
 .panel-section{
@@ -866,6 +944,7 @@ footer{
   gap:10px;
   flex-wrap:wrap;
   margin-bottom:24px;
+  scroll-snap-type:x mandatory;
 }
 
 .tab-btn{
@@ -883,6 +962,7 @@ footer{
   justify-content:center;
   gap:10px;
   font-weight:600;
+  scroll-snap-align:start;
 }
 
 .tab-btn i{
@@ -960,11 +1040,11 @@ footer{
     gap:24px;
   }
 
-  .hero-text h1{
-    font-size:56px;
-    line-height:.95;
-    letter-spacing:-2px;
-  }
+.hero-text h1{
+  font-size:44px;
+  line-height:1;
+  letter-spacing:-2px;
+}
 
   .hero-text p{
     font-size:16px;
@@ -1058,6 +1138,8 @@ footer{
     bottom:20px;
     right:20px;
     border-radius:18px;
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.08);
   }
 
   .dynamic-island{
@@ -1239,10 +1321,12 @@ canvas,
   padding:16px;
   border:none;
   border-radius:18px;
-  background:rgba(255,255,255,.05);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);
   color:white;
   cursor:pointer;
-  transition:.3s;
+  font-weight:600;
+  backdrop-filter:blur(10px);
 }
 
 .quick-btn:hover{
@@ -1252,6 +1336,14 @@ canvas,
     #4f46e5,
     #06b6d4
   );
+}
+
+#previewImg{
+  display:none;
+}
+
+.preview.loaded #previewImg{
+  display:block;
 }
 
 </style>
@@ -2128,10 +2220,13 @@ addLayerBtn.addEventListener("click",() => {
 /* =========================
    ACTIVE IMAGE
 ========================= */
+let selectedFeature = "resize";
 
 function setActiveImage(img,file,index){
 
   uploadedImage = img;
+  
+  preview.classList.add("loaded");
 
   originalFile = file;
 
@@ -2222,9 +2317,11 @@ function processImage(width,height,quality){
   const progressInterval =
     setInterval(() => {
 
-      progress += Math.floor(
-        Math.random() * 18
-      );
+progress += Math.random() * 12;
+progress = Math.min(
+  Math.floor(progress),
+  95
+);
 
       if(progress > 95){
         progress = 95;
@@ -2665,6 +2762,31 @@ showIsland(
   "Welcome",
   "DT Image Tools Ready"
 );
+
+</script>
+
+<script>
+
+window.addEventListener("load",()=>{
+
+  document.body.animate(
+    [
+      {
+        opacity:0,
+        transform:"translateY(10px)"
+      },
+      {
+        opacity:1,
+        transform:"translateY(0)"
+      }
+    ],
+    {
+      duration:700,
+      easing:"cubic-bezier(.19,1,.22,1)"
+    }
+  );
+
+});
 
 </script>
 
