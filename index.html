@@ -263,7 +263,7 @@ nav{
 }
 
 .preview img{
-  width:100%;
+  width:auto;
   max-width:100%;
   max-height:70vh;
   object-fit:contain;
@@ -490,7 +490,7 @@ footer{
 
 .dynamic-island{
   position:fixed;
-  top:18px;
+  top:78px;
   left:50%;
   transform:
     translateX(-50%)
@@ -1371,6 +1371,35 @@ canvas{
   overflow:hidden;
 }
 
+.cropper-view-box,
+.cropper-face{
+  border-radius:20px;
+}
+
+.cropper-container{
+  max-width:100% !important;
+}
+
+.cropper-canvas img{
+  max-width:100% !important;
+}
+
+@media(max-width:768px){
+
+  .tool-box{
+    overflow:hidden;
+  }
+
+  .canvas-wrap{
+    overflow:hidden;
+  }
+
+  .workspace{
+    max-width:100%;
+  }
+
+}
+
 </style>
 </head>
 <body>
@@ -1969,6 +1998,7 @@ addLayerBtn2.addEventListener("click",() => {
   });
 
   renderLayers();
+  feather.replace();
 
   showIsland(
     "Layer Added",
@@ -2104,9 +2134,17 @@ document.querySelector(".layer-sidebar");
 
 advancedToggle.addEventListener("click",()=>{
 
-  layerSidebar.classList.toggle("show");
+  if(layerSidebar.classList.contains("hidden-panel")){
 
-  layerSidebar.classList.toggle("hidden-panel");
+    layerSidebar.classList.remove("hidden-panel");
+    layerSidebar.classList.add("show");
+
+  }else{
+
+    layerSidebar.classList.remove("show");
+    layerSidebar.classList.add("hidden-panel");
+
+  }
 
 });
 
@@ -2136,7 +2174,10 @@ function showIsland(
   }else{
 
 iconWrap.innerHTML =
-  feather.icons.check.toSvg();
+  feather.icons.check.toSvg({
+    width:20,
+    height:20
+  });
 
   }
 
@@ -2232,6 +2273,7 @@ addLayerBtn.addEventListener("click",() => {
   });
 
   renderLayers();
+  feather.replace();
 
   showIsland(
     "Layer Added",
@@ -2256,6 +2298,10 @@ function setActiveImage(img,file,index){
   activeIndex = index;
 
   preview.style.display = "block";
+  
+  document
+  .getElementById("emptyState")
+  .style.display = "none";
   
   downloadBtn.style.display = "none";
 
@@ -2282,6 +2328,7 @@ function setActiveImage(img,file,index){
   ];
 
   renderLayers();
+  feather.replace();
   
   /* AUTO OPEN TOOL */
 
@@ -2327,11 +2374,10 @@ function processImage(width,height,quality){
 
   resizeBtn.disabled = true;
   compressBtn.disabled = true;
-  islandLocked = false;
 
   let progress = 0;
   
-  if(islandLocked) return;
+if(islandLocked) return;
 
 islandLocked = true;
 
@@ -2488,6 +2534,7 @@ progress = Math.min(
       .getElementById("exportTab")
       .classList.add("active");
 
+    islandLocked = false;
     resizeBtn.disabled = false;
     compressBtn.disabled = false;
 
@@ -2585,31 +2632,13 @@ downloadBtn.addEventListener("click", () => {
     ext = "webp";
   }
 
-  // iPhone Safari Fix
-downloadBtn.addEventListener("click", () => {
-
-  const imageToDownload =
-    processedImage || previewImg.src;
-
-  if(!imageToDownload) return;
-
-  let ext = "jpg";
-
-  if(exportFormat.value === "image/png"){
-    ext = "png";
-  }
-
-  if(exportFormat.value === "image/webp"){
-    ext = "webp";
-  }
-
   const link =
     document.createElement("a");
 
   link.href = imageToDownload;
 
-  link.download =
-    dt-image-tools.${ext};
+link.download =
+  `dt-image-tools.${ext}`;
 
   document.body.appendChild(link);
 
