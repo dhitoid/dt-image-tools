@@ -2510,21 +2510,25 @@ function setActiveImage(img,file,index){
 
   preview.style.display = "block";
   
-  document
-.getElementById("stepUpload")
-.classList.add("active");
+const stepUpload =
+document.getElementById("stepUpload");
 
-document
-.getElementById("stepProcess")
-.classList.add("active");
+const stepProcess =
+document.getElementById("stepProcess");
+
+if(stepUpload){
+  stepUpload.classList.add("active");
+}
+
+if(stepProcess){
+  stepProcess.classList.add("active");
+}
   
   document
   .getElementById("emptyState")
   .style.display = "none";
   
   downloadBtn.style.display = "none";
-
-  previewImg.src = img.src;
 
   cropperImage.src = img.src;
 
@@ -2565,6 +2569,10 @@ tabBtns.forEach(el =>
 toolContents.forEach(el =>
   el.classList.remove("active")
 );
+
+previewImg.src = img.src;
+
+previewImg.style.display = "block";
 
 document
 .getElementById("emptyState")
