@@ -868,30 +868,72 @@ footer{
 
 .canvas-wrap{
   position:relative;
-  background:rgba(255,255,255,.035);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.06),
+      rgba(255,255,255,.03)
+    );
+
   border:1px solid rgba(255,255,255,.08);
-  border-radius:30px;
-  padding:18px;
+
+  border-radius:34px;
+
+  padding:24px;
+
   overflow:hidden;
-  min-height:420px;
+
+  min-height:500px;
 
   display:flex;
   align-items:center;
   justify-content:center;
+
+  backdrop-filter:blur(20px);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.canvas-wrap::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(103,232,249,.08),
+      transparent 45%
+    );
+
+  pointer-events:none;
 }
 
 .canvas-wrap img{
-  width:100%;
+  width:auto;
   max-width:100%;
-  max-height:70vh;
-  object-fit:contain;
-  display:block;
-  margin:auto;
-  border-radius:20px;
+  max-height:72vh;
 
-  /* FIX OVERFLOW */
-  height:auto;
-  overflow:hidden;
+  object-fit:contain;
+
+  border-radius:24px;
+
+  position:relative;
+  z-index:2;
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.45);
+
+  transition:
+    transform .4s ease,
+    opacity .4s ease;
+}
+
+.canvas-wrap img:hover{
+  transform:scale(1.01);
 }
 
 .workspace,
@@ -1557,6 +1599,18 @@ canvas{
 
 .preview{
   margin-top:30px;
+  animation:previewFade .5s ease;
+}
+
+@keyframes previewFade{
+  from{
+    opacity:0;
+    transform:translateY(14px) scale(.98);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
 }
 
 .workspace{
@@ -1587,6 +1641,87 @@ canvas{
     padding:36px 16px;
   }
 
+}
+
+.preview-loader{
+  position:absolute;
+  inset:0;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  gap:16px;
+
+  background:rgba(6,8,22,.65);
+
+  backdrop-filter:blur(12px);
+
+  z-index:10;
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:.3s;
+}
+
+.preview-loader.show{
+  opacity:1;
+}
+
+.preview-loader-spin{
+  width:54px;
+  height:54px;
+
+  border-radius:50%;
+
+  border:3px solid rgba(255,255,255,.12);
+  border-top-color:#67e8f9;
+
+  animation:spin .8s linear infinite;
+}
+
+.preview-loader p{
+  color:white;
+  font-weight:600;
+}
+
+.compare-box{
+  margin-top:24px;
+
+  display:grid;
+  grid-template-columns:1fr 1fr;
+
+  gap:18px;
+}
+
+.compare-item{
+  background:rgba(255,255,255,.04);
+
+  border:1px solid rgba(255,255,255,.06);
+
+  border-radius:24px;
+
+  overflow:hidden;
+
+  padding:14px;
+}
+
+.compare-item span{
+  display:block;
+
+  margin-bottom:12px;
+
+  color:#67e8f9;
+
+  font-weight:700;
+}
+
+.compare-item img{
+  width:100%;
+  border-radius:18px;
+  object-fit:cover;
 }
 
 </style>
@@ -1779,7 +1914,12 @@ canvas{
 
 </div>
 
-        <img id="previewImg">
+<div class="preview-loader" id="previewLoader">
+  <div class="preview-loader-spin"></div>
+  <p>Rendering Preview...</p>
+</div>
+
+<img id="previewImg">
 
         <div class="cropper-wrap">
           <img id="cropperImage">
@@ -1787,7 +1927,21 @@ canvas{
 
       </div>
 
-      <div class="batch-grid" id="batchGrid"></div>
+      <div class="compare-box" id="compareBox">
+
+  <div class="compare-item">
+    <span>Before</span>
+    <img id="beforeImg">
+  </div>
+
+  <div class="compare-item">
+    <span>After</span>
+    <img id="afterImg">
+  </div>
+
+</div>
+
+<div class="batch-grid" id="batchGrid"></div>
 
     </main>
 
@@ -2521,6 +2675,9 @@ if(stepUpload){
 if(stepProcess){
   stepProcess.classList.add("active");
 }
+
+document.getElementById("beforeImg").src = img.src;
+document.getElementById("afterImg").src = img.src;
   
   document
   .getElementById("emptyState")
@@ -2690,9 +2847,30 @@ progress = Math.min(
       );
       
       canvas.remove();
+      
+    const previewLoader =
+document.getElementById("previewLoader");
 
-    previewImg.src =
-      processedImage;
+previewLoader.classList.add("show");
+
+previewImg.style.opacity = "0";
+
+setTimeout(()=>{
+
+  previewImg.src = processedImage;
+  
+document.getElementById("afterImg").src =
+processedImage;
+
+  previewImg.onload = () => {
+
+    previewLoader.classList.remove("show");
+
+    previewImg.style.opacity = "1";
+
+  };
+
+},400);
 
     const base64Length =
       processedImage.length -
@@ -2838,43 +3016,91 @@ newImg.src = cropped;
    DOWNLOAD
 ========================= */
 
-downloadBtn.addEventListener("click", () => {
+downloadBtn.addEventListener("click", async () => {
 
-  const imageToDownload =
-    processedImage || previewImg.src;
+  try{
 
-  if(!imageToDownload){
-    return;
+    const imageToDownload =
+      processedImage || previewImg.src;
+
+    if(!imageToDownload){
+
+      showIsland(
+        "Error",
+        "No image available"
+      );
+
+      return;
+    }
+
+    showIsland(
+      "Preparing Download",
+      "Generating file...",
+      true,
+      40
+    );
+
+    const response =
+      await fetch(imageToDownload);
+
+    const blob =
+      await response.blob();
+
+    const blobUrl =
+      URL.createObjectURL(blob);
+
+    let ext = "jpg";
+
+    if(exportFormat.value === "image/png"){
+      ext = "png";
+    }
+
+    if(exportFormat.value === "image/webp"){
+      ext = "webp";
+    }
+
+    const link =
+      document.createElement("a");
+
+    link.href = blobUrl;
+
+    link.download =
+      `dt-image-tools-${Date.now()}.${ext}`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    setTimeout(()=>{
+
+      URL.revokeObjectURL(blobUrl);
+
+    },2000);
+
+    showIsland(
+      "Download Started",
+      `
+      <span class="progress-text">
+        100%
+      </span>
+      File successfully exported
+      `,
+      false,
+      100
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    showIsland(
+      "Download Failed",
+      "Try again or use smaller image"
+    );
+
   }
-
-  let ext = "jpg";
-
-  if(exportFormat.value === "image/png"){
-    ext = "png";
-  }
-
-  if(exportFormat.value === "image/webp"){
-    ext = "webp";
-  }
-
-  const link =
-    document.createElement("a");
-
-  link.href = imageToDownload;
-
-link.download =
-  `dt-image-tools.${ext}`;
-
-  document.body.appendChild(link);
-
-  link.click();
-
-  document.body.removeChild(link);
-
-  showIsland(
-    "Download Started",
-    "Saving image..."
-  );
 
 });
 
