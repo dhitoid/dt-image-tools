@@ -1207,8 +1207,10 @@ canvas,
 
 .cropper-wrap img{
   width:100%;
+  max-width:100%;
   height:auto;
   display:block;
+  object-fit:contain;
 }
 
 .batch-item img{
@@ -1284,7 +1286,7 @@ canvas,
   display:none;
 }
 
-.hidden-panel.show{
+.layer-sidebar.show{
   display:block;
 }
 
@@ -1344,6 +1346,29 @@ canvas,
 
 .preview.loaded #previewImg{
   display:block;
+}
+
+*{
+  min-width:0;
+}
+
+html,
+body{
+  width:100%;
+  overflow-x:hidden;
+}
+
+img,
+canvas{
+  max-width:100%;
+}
+
+.tool-box,
+.workspace,
+.editor-panel,
+.canvas-wrap{
+  max-width:100%;
+  overflow:hidden;
 }
 
 </style>
@@ -1922,6 +1947,7 @@ let originalFile = null;
 let uploadedFiles = [];
 let activeIndex = 0;
 let cropper = null;
+let islandLocked = false;
 let layers = [];
 
 const layerList =
@@ -1992,10 +2018,6 @@ fileInput.addEventListener("change", e => {
           setActiveImage(img,file,index);
 
         }
-        
-        document
-.getElementById("emptyState")
-.style.display = "none";
 
         const div =
           document.createElement("div");
@@ -2030,6 +2052,7 @@ fileInput.addEventListener("change", e => {
 .style.display = "none";
 
         batchGrid.appendChild(div);
+        feather.replace();
 
       };
 
@@ -2083,6 +2106,8 @@ advancedToggle.addEventListener("click",()=>{
 
   layerSidebar.classList.toggle("show");
 
+  layerSidebar.classList.toggle("hidden-panel");
+
 });
 
 /* =========================
@@ -2110,10 +2135,8 @@ function showIsland(
 
   }else{
 
-    iconWrap.innerHTML =
-      `<i data-feather="check"></i>`;
-
-    feather.replace();
+iconWrap.innerHTML =
+  feather.icons.check.toSvg();
 
   }
 
@@ -2304,8 +2327,13 @@ function processImage(width,height,quality){
 
   resizeBtn.disabled = true;
   compressBtn.disabled = true;
+  islandLocked = false;
 
   let progress = 0;
+  
+  if(islandLocked) return;
+
+islandLocked = true;
 
   showIsland(
     "AI Processing",
@@ -2389,6 +2417,8 @@ progress = Math.min(
         format,
         quality
       );
+      
+      canvas.remove();
 
     previewImg.src =
       processedImage;
@@ -2508,8 +2538,20 @@ cropApplyBtn.addEventListener("click",() => {
 
 previewImg.src = cropped;
 processedImage = cropped;
-uploadedImage = new Image();
-uploadedImage.src = cropped;
+
+const newImg = new Image();
+
+newImg.onload = () => {
+
+  uploadedImage = newImg;
+
+  resizeWidth.value = newImg.width;
+  resizeHeight.value = newImg.height;
+
+};
+
+newImg.src = cropped;
+
   cropper.destroy();
   cropper = null;
 
@@ -2544,58 +2586,40 @@ downloadBtn.addEventListener("click", () => {
   }
 
   // iPhone Safari Fix
-  const newTab = window.open();
+downloadBtn.addEventListener("click", () => {
 
-  newTab.document.write(`
-    <html>
-      <head>
-        <title>Download Image</title>
-        <style>
-          body{
-            margin:0;
-            background:#000;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-            flex-direction:column;
-            font-family:sans-serif;
-            color:white;
-          }
-          img{
-            max-width:90%;
-            max-height:80vh;
-            border-radius:20px;
-          }
-          a{
-            margin-top:20px;
-            padding:14px 24px;
-            border-radius:14px;
-            background:#4f46e5;
-            color:white;
-            text-decoration:none;
-            font-weight:bold;
-          }
-        </style>
-      </head>
-      <body>
+  const imageToDownload =
+    processedImage || previewImg.src;
 
-        <img src="${imageToDownload}">
+  if(!imageToDownload) return;
 
-        <a
-          href="${imageToDownload}"
-          download="dt-image-tools.${ext}"
-        >
-          Download Image
-        </a>
+  let ext = "jpg";
 
-      </body>
-    </html>
-  `);
+  if(exportFormat.value === "image/png"){
+    ext = "png";
+  }
+
+  if(exportFormat.value === "image/webp"){
+    ext = "webp";
+  }
+
+  const link =
+    document.createElement("a");
+
+  link.href = imageToDownload;
+
+  link.download =
+    dt-image-tools.${ext};
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
 
   showIsland(
-    "Download Ready",
-    "Image ready to save"
+    "Download Started",
+    "Saving image..."
   );
 
 });
@@ -2699,8 +2723,6 @@ tabBtns.forEach(btn => {
 /* =========================
    FEATURE SELECT
 ========================= */
-
-let selectedFeature = "resize";
 
 const featureBtns =
 document.querySelectorAll(".feature-btn");
